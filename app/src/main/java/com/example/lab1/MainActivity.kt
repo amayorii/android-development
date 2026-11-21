@@ -28,7 +28,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.mutableIntStateOf
 import com.example.lab1.ui.theme.Lab1Theme
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,6 +48,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Lab1App() {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+
+    var saveableStateHolder = rememberSaveableStateHolder();
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -65,16 +69,18 @@ fun Lab1App() {
         }
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            when(currentDestination){
-                AppDestinations.HOME -> HomeScreen(
-                    Modifier.padding(innerPadding)
-                )
-                AppDestinations.FRIENDS -> FriendsScreen(
-                    Modifier.padding(innerPadding)
-                )
-                AppDestinations.SETTINGS -> SettingsScreen(
-                    Modifier.padding(innerPadding)
-                )
+            saveableStateHolder.SaveableStateProvider(currentDestination) {
+                when(currentDestination){
+                    AppDestinations.HOME -> HomeScreen(
+                        Modifier.padding(innerPadding)
+                    )
+                    AppDestinations.FRIENDS -> FriendsScreen(
+                        Modifier.padding(innerPadding)
+                    )
+                    AppDestinations.SETTINGS -> SettingsScreen(
+                        Modifier.padding(innerPadding)
+                    )
+                }
             }
         }
     }
@@ -91,27 +97,77 @@ enum class AppDestinations(
 
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier) {
-    var homeText by remember { mutableStateOf("this is settings screen") }
+    var homeText by remember { mutableStateOf("this is home screen") }
+    var subScreen by rememberSaveable { mutableIntStateOf(1) }
 
-    Column(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = homeText,
-            color = Color(Color.Cyan.value)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = {
-                homeText = "yeah welcome"
-            },
-            modifier = Modifier.width(200.dp).height(50.dp)
-        ) {
-            Text("Welcome")
+    when(subScreen){
+        1 -> {
+            Column(
+                modifier = modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = homeText,
+                    color = Color(Color.Cyan.value)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        homeText = "yeah welcome"
+                    },
+                    modifier = Modifier.width(200.dp).height(50.dp)
+                ) {
+                    Text("Welcome")
+                }
+                Spacer(modifier = Modifier.height(16.dp));
+                Button(
+                    onClick = {
+                        subScreen = 2;
+                    },
+                    modifier = Modifier.width(200.dp).height(50.dp)
+                ) {
+                    Text("Next screen")
+                }
+            }
+        }
+
+        2 -> {
+            Column(
+                modifier = modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "first subscreen", color = Color.Magenta)
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = { subScreen = 3 }) {
+                    Text("Next screen")
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = { subScreen = 1 }) {
+                    Text("Previous screen")
+                }
+            }
+        }
+
+        3 -> {
+            Column(
+                modifier = modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(
+                    text = "second subscreen",
+                    color = Color.Yellow
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = { subScreen = 2 }) {
+                    Text("Previous screen")
+                }
+            }
         }
     }
+
 }
 
 @Composable
