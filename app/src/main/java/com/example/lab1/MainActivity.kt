@@ -6,17 +6,22 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.mutableIntStateOf
 import com.example.lab1.ui.theme.Lab1Theme
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,9 +102,10 @@ enum class AppDestinations(
 }
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(modifier: Modifier = Modifier, viewModel: MainViewModel = viewModel()) {
     var homeText by remember { mutableStateOf("this is home screen") }
     var subScreen by rememberSaveable { mutableIntStateOf(1) }
+    val itemsList by viewModel.items.collectAsState()
 
     when(subScreen){
         1 -> {
@@ -161,7 +168,42 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                     color = Color.Yellow
                 )
                 Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = { subScreen = 4 }) {
+                    Text("Next screen")
+                }
+                Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = { subScreen = 2 }) {
+                    Text("Previous screen")
+                }
+            }
+        }
+
+        4 -> {
+            Column(
+                modifier = modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentPadding = PaddingValues(bottom = 16.dp)
+                ) {
+                    items(
+                        items = itemsList,
+                        key = { it.id }
+                    ) { currentItem ->
+                        when (currentItem) {
+                            is CarItem -> CarItemView(currentItem)
+                            is MotorcycleItem -> MotorcycleItemView(currentItem)
+                            is PopularBrandsItem -> PopularBrandsHorizontalView(currentItem)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(onClick = { subScreen = 3 }) {
                     Text("Previous screen")
                 }
             }
